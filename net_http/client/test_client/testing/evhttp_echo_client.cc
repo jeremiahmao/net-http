@@ -16,6 +16,11 @@ limitations under the License.
 // A test client to print the response from the evhttp_echo_server
 // URI: /print
 
+//function http://localhost:{port}/print
+//POST. HTTP POST requests supply additional data from the client (browser) to the server in the message body. 
+//In contrast, GET requests include all required data in the URL, no body
+
+
 #include <iostream>
 
 #include "net_http/client/test_client/internal/evhttp_connection.h"
@@ -33,6 +38,7 @@ bool SendRequest(const char* url) {
   }
 
   TestClientRequest request = {url, "GET", {}, ""};
+  //TestClientRequest request = {url, "POST", {}, "echo this text"};
   TestClientResponse response = {};
 
   if (!connection->BlockingSendRequest(request, &response)) {
