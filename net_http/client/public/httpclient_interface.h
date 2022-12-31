@@ -21,6 +21,8 @@
 #include "absl/strings/string_view.h"
 #include "absl/time/time.h"
 
+#include "absl/synchronization/notification.h"
+
 #include "net_http/client/public/client_request_interface.h"
 
 //Everything in this API is experimental and subject to change.
@@ -48,10 +50,20 @@ class ClientOptions{
   void SetExecutor(std::unique_ptr<ClientOptions::EventExecutor> executor) {
     executor_ = std::move(executor);
   }
+
   ClientOptions::EventExecutor* executor() const { return executor_.get(); }
+
+  void ResetNotification(){
+    loop_exit_.reset(new absl::Notification());
+  }
+
+  void Notify(){
+    loop_exit_->Notify();
+  }
 
  private:
   std::unique_ptr<ClientOptions::EventExecutor> executor_;
+  std::unique_ptr<absl::Notification> loop_exit_;
 };
 
 class HTTPClientInterface {

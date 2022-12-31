@@ -101,7 +101,6 @@ class EvHTTPClientRequest : public ClientRequestInterface {
     std::unique_ptr<ParsedEvResponse> parsed_response_;
 
     ClientOptions* client_options_ = nullptr; //needed for executor, owned by client
-    std::unique_ptr<absl::Notification> loop_exit_;
     
     //for Send()
     evhttp_connection* ev_con_;

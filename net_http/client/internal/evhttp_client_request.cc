@@ -265,10 +265,13 @@ void EvHTTPClientRequest::Send(){
    return;
  }
   
+  /*
+   When the following code runs
+  */
   client_options_->executor()->Schedule([this]() {
-    loop_exit_.reset(new absl::Notification());
+    client_options_->ResetNotification();
     event_base_dispatch(ev_base_);
-    loop_exit_->Notify();
+    client_options_->Notify();
   });
  return;
 }
