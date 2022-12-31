@@ -52,6 +52,8 @@ void GlobalInitialize() { absl::call_once(libevent_init_once, &InitLibEvent); }
 
 }  // namespace
 
+//Explicit constructor: takes the already user initialized ServerOptions class
+// also, the EvHTTPServer is initialized as not accepting requests yet.
 EvHTTPServer::EvHTTPServer(std::unique_ptr<ServerOptions> options)
     : server_options_(std::move(options)), accepting_requests_() {}
 
@@ -94,6 +96,8 @@ bool EvHTTPServer::Initialize() {
     return false;
   }
 
+  //Optimization for large numberof same duration timeouts. The value immediate_
+  // is an opaque value that is used in event_add().
   timeval tv_zero = {0, 0};
   immediate_ = event_base_init_common_timeout(ev_base_, &tv_zero);
 
