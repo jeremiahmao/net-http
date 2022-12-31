@@ -19,7 +19,8 @@ ParsedEvResponse::~ParsedEvResponse() {
   }
 }
 
-ParsedEvResponse::ParsedEvResponse(ClientHandlerInterface* handler, ClientHandlerOptions* handler_options)
+ParsedEvResponse::ParsedEvResponse(ClientHandlerInterface* handler, 
+                                   ClientHandlerOptions* handler_options)
     : request(nullptr),
       handler(handler),
       handler_options(handler_options)
@@ -38,10 +39,12 @@ void ParsedEvResponse::decode_response() { //similar to PopulateResponse in test
 
 EvHTTPClientRequest::EvHTTPClientRequest(ClientHandlerInterface* handler,
                                          ClientHandlerOptions* handler_options,
+                                         ClientOptions* client_options,
                                          evhttp_connection* ev_con
                                          )
     : ev_con_(ev_con), 
       ev_base_(evhttp_connection_get_base(ev_con)),
+      client_options_(client_options),
       parsed_response_(new ParsedEvResponse(handler, handler_options)),
       output_buf(nullptr) {Initialize();}
 
@@ -245,6 +248,7 @@ evhttp_cmd_type GetMethodEnum(absl::string_view method, bool with_body) {
   }
 }
 
+//asynchronously sends requests via event executor
 void EvHTTPClientRequest::Send(){
 
  //This means the request is not constantly streaming something
@@ -261,8 +265,11 @@ void EvHTTPClientRequest::Send(){
    return;
  }
   
-  event_base_dispatch(ev_base_);
-
+  client_options_->executor()->Schedule([this]() {
+    loop_exit_.reset(new absl::Notification());
+    event_base_dispatch(ev_base_);
+    loop_exit_->Notify();
+  });
  return;
 }
 

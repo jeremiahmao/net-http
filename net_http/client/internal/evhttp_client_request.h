@@ -8,7 +8,7 @@
 
 #include "net_http/client/public/client_request_interface.h"
 
-//needed for ClientOptions
+//needed for ClientOptions executor
 #include "net_http/client/public/httpclient_interface.h"
 
 struct evhttp_request;
@@ -42,8 +42,8 @@ struct ParsedEvResponse {
     HTTPStatusCode response_status = HTTPStatusCode::UNDEFINED;
     evkeyvalq* response_headers = nullptr;  // owned by raw request
 
-    ClientHandlerInterface* handler = nullptr; //callback handler
-    ClientHandlerOptions* handler_options = nullptr;
+    ClientHandlerInterface* handler = nullptr; //callback
+    ClientHandlerOptions* handler_options = nullptr; // currently unused
 };
 
 
@@ -58,6 +58,7 @@ class EvHTTPClientRequest : public ClientRequestInterface {
     //evconnection and evbase are subject to being removed based on design
     EvHTTPClientRequest(ClientHandlerInterface* handler,
                         ClientHandlerOptions* handler_options,
+                        ClientOptions* client_options,
                         evhttp_connection* ev_con);
     
     void SetUriPath(absl::string_view path) override;
@@ -98,6 +99,9 @@ class EvHTTPClientRequest : public ClientRequestInterface {
     bool with_body_ = false;
 
     std::unique_ptr<ParsedEvResponse> parsed_response_;
+
+    ClientOptions* client_options_ = nullptr; //needed for executor, owned by client
+    std::unique_ptr<absl::Notification> loop_exit_;
     
     //for Send()
     evhttp_connection* ev_con_;

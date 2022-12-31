@@ -52,7 +52,10 @@ std::unique_ptr<ClientRequestInterface> EvHTTPClient::MakeRequest(absl::string_v
                                               ClientHandlerOptions* handler_options)
 {
  std::unique_ptr<ClientRequestInterface> request(new EvHTTPClientRequest
-                                    (handler, handler_options,this->ev_con_));
+                                    (handler, 
+                                    handler_options, 
+                                    client_options_.get(),
+                                    this->ev_con_));
     
     absl::string_view path = uri_path;
     
